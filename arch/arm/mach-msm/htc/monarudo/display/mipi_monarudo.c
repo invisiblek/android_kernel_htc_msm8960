@@ -11,7 +11,6 @@ typedef struct dsi_cmd_t {
 } dsi_cmd;
 
 static dsi_cmd video_on_c;
-static dsi_cmd display_on_c;
 static dsi_cmd display_off_c;
 static dsi_cmd backlight_c;
 
@@ -46,7 +45,6 @@ static int monarudo_send_display_cmds(dsi_cmd *cmd, bool clk_ctrl)
 	return ret;
 }
 
-int mipi_lcd_on = 1;
 static int monarudo_lcd_on(struct platform_device *pdev)
 {
 	struct msm_fb_data_type *mfd;
@@ -57,14 +55,11 @@ static int monarudo_lcd_on(struct platform_device *pdev)
 		return -ENODEV;
 	if (mfd->key != MFD_KEY)
 		return -EINVAL;
-	if (mipi_lcd_on)
-		return 0;
 
 	mipi = &mfd->panel_info.mipi;
 	if (mipi->mode == DSI_VIDEO_MODE)
 		monarudo_send_display_cmds(&video_on_c, false);
 
-	mipi_lcd_on = 1;
 	return 0;
 }
 
@@ -79,36 +74,8 @@ static int monarudo_lcd_off(struct platform_device *pdev)
 	if (mfd->key != MFD_KEY)
 		return -EINVAL;
 
-	if (!mipi_lcd_on)
-		return 0;
-
-	mipi_lcd_on = 0;
+	monarudo_send_display_cmds(&display_off_c, false);
 	resume_blk = 1;
-
-	return 0;
-}
-
-static int monarudo_display_on(struct platform_device *pdev)
-{
-	struct msm_fb_data_type *mfd;
-
-	mfd = platform_get_drvdata(pdev);
-
-	/* It needs 120ms when LP to HS for renesas */
-	msleep(120);
-
-	monarudo_send_display_cmds(&display_on_c, (mfd && mfd->panel_info.type == MIPI_CMD_PANEL));
-
-	return 0;
-}
-
-static int monarudo_display_off(struct platform_device *pdev)
-{
-	struct msm_fb_data_type *mfd;
-
-	mfd = platform_get_drvdata(pdev);
-
-	monarudo_send_display_cmds(&display_off_c, (mfd && mfd->panel_info.type == MIPI_CMD_PANEL));
 
 	return 0;
 }
@@ -226,8 +193,6 @@ static struct msm_fb_panel_data monarudo_panel_data = {
 	.on     = monarudo_lcd_on,
 	.off    = monarudo_lcd_off,
 	.set_backlight = monarudo_set_backlight,
-	.late_init = monarudo_display_on,
-	.early_off = monarudo_display_off,
 };
 
 static int ch_used[3];
@@ -278,8 +243,6 @@ static void mipi_video_sharp_init(void)
 {
 	video_on_c.cmds = sharp_video_on_cmds;
 	video_on_c.count = ARRAY_SIZE(sharp_video_on_cmds);
-	display_on_c.cmds = renesas_display_on_cmds;
-	display_on_c.count = ARRAY_SIZE(renesas_display_on_cmds);
 	display_off_c.cmds = sharp_display_off_cmds;
 	display_off_c.count = ARRAY_SIZE(sharp_display_off_cmds);
 	backlight_c.cmds = renesas_cmd_backlight_cmds;
@@ -290,8 +253,6 @@ static void mipi_video_sony_init(void)
 {
 	video_on_c.cmds = sony_video_on_cmds;
 	video_on_c.count = ARRAY_SIZE(sony_video_on_cmds);
-	display_on_c.cmds = renesas_display_on_cmds;
-	display_on_c.count = ARRAY_SIZE(renesas_display_on_cmds);
 	display_off_c.cmds = sony_display_off_cmds;
 	display_off_c.count = ARRAY_SIZE(sony_display_off_cmds);
 	backlight_c.cmds = renesas_cmd_backlight_cmds;

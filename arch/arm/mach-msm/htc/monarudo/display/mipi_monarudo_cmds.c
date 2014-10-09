@@ -13,10 +13,6 @@ static struct dsi_cmd_desc renesas_cmd_backlight_cmds[] = {
 	{DTYPE_DCS_LWRITE, 1, 0, 0, 0, sizeof(write_display_brightness), write_display_brightness},
 };
 
-static struct dsi_cmd_desc renesas_display_on_cmds[] = {
-	{DTYPE_DCS_LWRITE, 1, 0, 0, 0, sizeof(display_on), display_on},
-};
-
 static char interface_setting_0[2] = {0xB0, 0x04};
 
 static char Color_enhancement[33]= {
@@ -55,6 +51,7 @@ static struct dsi_cmd_desc sharp_video_on_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(CABC), CABC},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(TE_OUT), TE_OUT},
 	{DTYPE_DCS_WRITE,  1, 0, 0, 0, sizeof(exit_sleep), exit_sleep},
+	{DTYPE_DCS_LWRITE, 1, 0, 0, 0, sizeof(display_on), display_on},
 };
 
 static struct dsi_cmd_desc sony_video_on_cmds[] = {
@@ -72,6 +69,7 @@ static struct dsi_cmd_desc sony_video_on_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(write_control_display), write_control_display},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(TE_OUT), TE_OUT},
 	{DTYPE_DCS_WRITE, 1, 0, 0, 0, sizeof(exit_sleep), exit_sleep},
+	{DTYPE_DCS_LWRITE, 1, 0, 0, 0, sizeof(display_on), display_on},
 };
 
 static struct dsi_cmd_desc sharp_display_off_cmds[] = {

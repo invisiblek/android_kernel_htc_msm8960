@@ -220,9 +220,9 @@ static struct lcdc_platform_data dtv_pdata = {
 static struct msm_panel_common_pdata mdp_pdata = {
 	.gpio = MDP_VSYNC_GPIO,
 	.mdp_max_clk = 266667000,
-	.mdp_max_bw = 4290000000u,
-	.mdp_bw_ab_factor = 140,
-	.mdp_bw_ib_factor = 210,
+	.mdp_max_bw = 2000000000,
+	.mdp_bw_ab_factor = 115,
+	.mdp_bw_ib_factor = 150,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.mdp_bus_scale_table = &mdp_bus_scale_pdata,
 #endif
@@ -275,7 +275,6 @@ void __init monarudo_mdp_writeback(struct memtype_reserve* reserve_table)
 #endif
 }
 
-extern int mipi_lcd_on;
 static bool dsi_power_on;
 
 static int mipi_dsi_panel_power(int on)
@@ -347,14 +346,13 @@ static int mipi_dsi_panel_power(int on)
 			pr_err("enable lvs5 failed, rc=%d\n", rc);
 			return -ENODEV;
 		}
-		if (!mipi_lcd_on) {
-			hr_msleep(1);
-			gpio_set_value_cansleep(gpio37, 1);
-			hr_msleep(2);
-			gpio_set_value_cansleep(gpio36, 1);
-			hr_msleep(7);
-			gpio_set_value(LCD_RST, 1);
-		}
+
+		hr_msleep(1);
+		gpio_set_value_cansleep(gpio37, 1);
+		hr_msleep(2);
+		gpio_set_value_cansleep(gpio36, 1);
+		hr_msleep(7);
+		gpio_set_value(LCD_RST, 1);
 
 		/* Workaround for 1mA */
 		msm_xo_mode_vote(wa_xo, MSM_XO_MODE_ON);
